@@ -1,0 +1,48 @@
+
+
+services:
+  postgres:
+    image: postgres
+    container_name: my_postgres
+    environment:
+      POSTGRES_DB: kyc_report_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: stan
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - springnet
+
+  backend:
+    build:
+      context: ./kyc-backend-report
+    container_name: kyc_report
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kyc_report_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: stan
+    ports:
+      - "8080:8080"
+    networks:
+      - springnet
+
+  frontend:
+    build:
+      context: ./kyc-report-front-end
+    container_name: kyc_frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - springnet
+
+volumes:
+  pgdata:
+
+networks:
+  springnet:
